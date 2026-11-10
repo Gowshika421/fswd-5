@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TaskDesk Feedback</title>
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+  body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f7f2;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Header */
+  .header {
+    background-color: #154d29;
+    color: white;
+    padding: 15px 25px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .header h1 {
+    margin: 0;
+  }
+  .menu a {
+    color: white;
+    text-decoration: none;
+    border: 2px solid white;
+    padding: 8px 22px;
+    border-radius: 20px;
+    font-size: 15px;
+    margin-left: 8px;
+    display: inline-block;
+  }
+  .menu a.active {
+    background-color: #e2412f;
+    border-color: #e2412f;
+  }
+
+  .container {
+    width: 95%;
+    max-width: 1100px;
+    margin: 20px auto;
+  }
+
+  /* Summary boxes */
+  .summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+  .summary-box {
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+  }
+  .summary-box .number {
+    font-size: 30px;
+    font-weight: bold;
+    color: #154d29;
+  }
+
+  /* Feedback form */
+  .feedback-form {
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 20px;
+    max-width: 520px;
+    margin-bottom: 25px;
+  }
+  label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+    font-size: 14px;
+  }
+  input, textarea, select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 4px;
+    font-size: 14px;
+  }
+  .error {
+    color: red;
+    font-size: 13px;
+  }
+  .main-btn {
+    width: 100%;
+    background-color: #e2412f;
+    color: white;
+    border: none;
+    padding: 12px;
+    font-size: 16px;
+    margin-top: 15px;
+    cursor: pointer;
+    border-radius: 6px;
+  }
+
+  /* Star rating */
+  .stars {
+    font-size: 36px;
+    color: #ccc;
+    cursor: pointer;
+    margin-top: 4px;
+  }
+  .stars span {
+    padding-right: 4px;
+  }
+  .stars span.on {
+    color: #f5a623;
+  }
+
+  /* Cards: always 2 in each row */
+  .grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+  }
+  .item {
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .item .emoji {
+    font-size: 46px;
+    width: 70px;
+    text-align: center;
+  }
+  .item .details {
+    flex: 1;
+  }
+  .item h3 {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+  }
+  .item p {
+    color: #666;
+    font-size: 13px;
+    margin: 0 0 4px 0;
+  }
+  .item .rating {
+    color: #f5a623;
+    font-size: 18px;
+  }
+  .item .info {
+    font-size: 12px;
+    color: #154d29;
+    font-weight: bold;
+  }
+  .item .bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 8px;
+  }
+  .tag {
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: bold;
+    color: white;
+    background-color: #2563b8;
+  }
+  .delete-btn {
+    background-color: #e2412f;
+    color: white;
+    border: none;
+    padding: 7px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .empty-text {
+    color: #666;
+    padding: 20px 0;
+  }
+
+  /* Popup */
+  .popup-bg {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    overflow: auto;
+  }
+  .popup-box {
+    background-color: white;
+    width: 360px;
+    max-width: 90%;
+    margin: 120px auto;
+    padding: 25px;
+    border-radius: 12px;
+    text-align: center;
+  }
+  .tick {
+    width: 70px;
+    height: 70px;
+    line-height: 70px;
+    font-size: 38px;
+    color: white;
+    background-color: #1f6b3a;
+    border-radius: 50%;
+    margin: 0 auto 10px auto;
+  }
+  .done-btn {
+    background-color: #1f6b3a;
+    color: white;
+    border: none;
+    padding: 10px 30px;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+
+  /* Small phones: keep 2 per row, emoji above the text */
+  @media (max-width: 600px) {
+    .grid {
+      gap: 8px;
+    }
+    .item {
+      flex-direction: column;
+      text-align: center;
+      padding: 10px;
+    }
+    .item .emoji {
+      font-size: 36px;
+      width: auto;
+    }
+    .item .details {
+      width: 100%;
+    }
+    .item .bottom {
+      flex-direction: column;
+      gap: 6px;
+    }
+    .item h3 {
+      font-size: 14px;
+    }
+    .item p {
+      display: none;
+    }
+    .summary {
+      gap: 8px;
+    }
+  }
+</style>
+</head>
+
+<body>
+
+  <div class="header">
+    <h1>TaskDesk</h1>
+    <div class="menu">
+      <a href="tasks.html">Tasks</a>
+      <a href="feedback.html" class="active">Feedback</a>
+    </div>
+  </div>
+
+  <div class="container">
+
+    <h2>Customer Feedback</h2>
+
+    <div class="summary">
+      <div class="summary-box">
+        <div class="number" id="countTotal">0</div>
+        <div>Total Feedback</div>
+      </div>
+      <div class="summary-box">
+        <div class="number" id="avgRating">0.0</div>
+        <div>Average Rating</div>
+      </div>
+      <div class="summary-box">
+        <div class="number" id="countFive">0</div>
+        <div>5 Star Reviews</div>
+      </div>
+    </div>
+
+    <h2>Share Your Feedback</h2>
+    <div class="feedback-form">
+
+      <label>Your Name</label>
+      <input type="text" id="fbName">
+      <div class="error" id="errName"></div>
+
+      <label>Email</label>
+      <input type="text" id="fbEmail">
+      <div class="error" id="errEmail"></div>
+
+      <label>Category</label>
+      <select id="fbCategory">
+        <option value="Website">Website</option>
+        <option value="Service">Service</option>
+        <option value="Support">Support</option>
+        <option value="Suggestion">Suggestion</option>
+        <option value="Other">Other</option>
+      </select>
+
+      <label>Your Rating</label>
+      <div class="stars" id="starBox">
+        <span onclick="setRating(1)">&#9733;</span><span onclick="setRating(2)">&#9733;</span><span onclick="setRating(3)">&#9733;</span><span onclick="setRating(4)">&#9733;</span><span onclick="setRating(5)">&#9733;</span>
+      </div>
+      <div class="error" id="errRating"></div>
+
+      <label>Your Message</label>
+      <textarea id="fbMessage" rows="4"></textarea>
+      <div class="error" id="errMessage"></div>
+
+      <button class="main-btn" onclick="sendFeedback()">Send Feedback</button>
+    </div>
+
+    <h2>What People Say</h2>
+    <div class="grid" id="feedbackList"></div>
+
+  </div>
+
+  <!-- MESSAGE POPUP -->
+  <div class="popup-bg" id="msgPopup">
+    <div class="popup-box">
+      <div class="tick">&#10003;</div>
+      <h2 id="msgTitle"></h2>
+      <p id="msgText"></p>
+      <button class="done-btn" onclick="closeMsgPopup()">Done</button>
+    </div>
+  </div>
+
+<script>
+  // Default feedback (shown the first time)
+  var defaultFeedback = [
+    { id: 1, name: "Arun Kumar", email: "arun@example.com",  category: "Website",    rating: 5, message: "Very easy to use and looks great.",     date: "2026-11-05" },
+    { id: 2, name: "Priya Devi", email: "priya@example.com", category: "Support",    rating: 4, message: "Quick reply from the support team.",    date: "2026-11-06" },
+    { id: 3, name: "Karthik R",  email: "karthik@example.com", category: "Suggestion", rating: 3, message: "Please add a dark mode option.",      date: "2026-11-07" },
+    { id: 4, name: "Meena S",    email: "meena@example.com", category: "Service",    rating: 5, message: "Excellent service, thank you!",         date: "2026-11-08" }
+  ];
+
+  var feedbackList = [];
+  var rating = 0;
+
+  // Load feedback from the browser memory
+  function loadFeedback() {
+    var saved = null;
+    try {
+      saved = localStorage.getItem("feedbackData");
+    } catch (e) {
+      saved = null;
+    }
+    if (saved) {
+      feedbackList = JSON.parse(saved);
+    } else {
+      feedbackList = defaultFeedback;
+    }
+  }
+
+  // Save feedback in the browser memory
+  function saveFeedback() {
+    try {
+      localStorage.setItem("feedbackData", JSON.stringify(feedbackList));
+    } catch (e) {
+      // saving not available, ignore
+    }
+  }
+
+  // Make user text safe to show on the page
+  function safeText(text) {
+    text = String(text);
+    text = text.replace(/&/g, "&amp;");
+    text = text.replace(/</g, "&lt;");
+    text = text.replace(/>/g, "&gt;");
+    return text;
+  }
+
+  // Today's date as yyyy-mm-dd
+  function getToday() {
+    var d = new Date();
+    var month = d.getMonth() + 1;
+    var day = d.getDate();
+    if (month < 10) { month = "0" + month; }
+    if (day < 10) { day = "0" + day; }
+    return d.getFullYear() + "-" + month + "-" + day;
+  }
+
+  // Emoji for each rating
+  function getEmoji(r) {
+    if (r == 5) { return "😍"; }
+    if (r == 4) { return "😊"; }
+    if (r == 3) { return "😐"; }
+    if (r == 2) { return "😕"; }
+    return "😞";
+  }
+
+  // Build a star text like ★★★☆☆
+  function starText(r) {
+    var text = "";
+    for (var i = 1; i <= 5; i++) {
+      if (i <= r) {
+        text += "&#9733;";
+      } else {
+        text += "&#9734;";
+      }
+    }
+    return text;
+  }
+
+  // Click on a star in the form
+  function setRating(n) {
+    rating = n;
+    var stars = document.getElementById("starBox").getElementsByTagName("span");
+    for (var i = 0; i < stars.length; i++) {
+      if (i < n) {
+        stars[i].className = "on";
+      } else {
+        stars[i].className = "";
+      }
+    }
+  }
+
+  // Show all cards and counts
+  function showAll() {
+    var html = "";
+    var total = feedbackList.length;
+    var sum = 0;
+    var fiveCount = 0;
+
+    for (var i = 0; i < feedbackList.length; i++) {
+      var f = feedbackList[i];
+      sum = sum + f.rating;
+      if (f.rating == 5) { fiveCount++; }
+
+      html += '<div class="item">';
+      html += '<div class="emoji">' + getEmoji(f.rating) + '</div>';
+      html += '<div class="details">';
+      html += '<h3>' + safeText(f.name) + '</h3>';
+      html += '<div class="rating">' + starText(f.rating) + '</div>';
+      html += '<p>' + safeText(f.message) + '</p>';
+      html += '<div class="info">' + f.date + '</div>';
+      html += '<div class="bottom">';
+      html += '<span class="tag">' + safeText(f.category) + '</span>';
+      html += '<button class="delete-btn" onclick="deleteFeedback(' + f.id + ')">Delete</button>';
+      html += '</div></div></div>';
+    }
+
+    if (total == 0) {
+      html = '<div class="empty-text">No feedback yet. Be the first to share!</div>';
+    }
+
+    var average = 0;
+    if (total > 0) {
+      average = sum / total;
+    }
+
+    document.getElementById("feedbackList").innerHTML = html;
+    document.getElementById("countTotal").innerHTML = total;
+    document.getElementById("avgRating").innerHTML = average.toFixed(1);
+    document.getElementById("countFive").innerHTML = fiveCount;
+  }
+
+  // Send new feedback
+  function sendFeedback() {
+    var name = document.getElementById("fbName").value;
+    var email = document.getElementById("fbEmail").value;
+    var category = document.getElementById("fbCategory").value;
+    var message = document.getElementById("fbMessage").value;
+    var valid = true;
+
+    document.getElementById("errName").innerHTML = "";
+    document.getElementById("errEmail").innerHTML = "";
+    document.getElementById("errRating").innerHTML = "";
+    document.getElementById("errMessage").innerHTML = "";
+
+    if (name.length < 2) {
+      document.getElementById("errName").innerHTML = "Please enter your name.";
+      valid = false;
+    }
+    if (email.indexOf("@") < 1 || email.indexOf(".") < 3) {
+      document.getElementById("errEmail").innerHTML = "Please enter a valid email.";
+      valid = false;
+    }
+    if (rating == 0) {
+      document.getElementById("errRating").innerHTML = "Please click a star to rate.";
+      valid = false;
+    }
+    if (message.length < 5) {
+      document.getElementById("errMessage").innerHTML = "Please write your message.";
+      valid = false;
+    }
+
+    if (valid == true) {
+      feedbackList.unshift({
+        id: new Date().getTime(),
+        name: name,
+        email: email,
+        category: category,
+        rating: rating,
+        message: message,
+        date: getToday()
+      });
+      saveFeedback();
+      showAll();
+
+      document.getElementById("fbName").value = "";
+      document.getElementById("fbEmail").value = "";
+      document.getElementById("fbMessage").value = "";
+      setRating(0);
+
+      showMessage("Thank You!", "Thank you, " + name + "! Your feedback has been sent. We really appreciate it.");
+    }
+  }
+
+  // Delete a feedback
+  function deleteFeedback(id) {
+    for (var i = 0; i < feedbackList.length; i++) {
+      if (feedbackList[i].id == id) {
+        feedbackList.splice(i, 1);
+        break;
+      }
+    }
+    saveFeedback();
+    showAll();
+  }
+
+  // Popup
+  function showMessage(title, text) {
+    document.getElementById("msgTitle").innerHTML = title;
+    document.getElementById("msgText").textContent = text;
+    document.getElementById("msgPopup").style.display = "block";
+  }
+
+  function closeMsgPopup() {
+    document.getElementById("msgPopup").style.display = "none";
+  }
+
+  // Run when the page opens
+  loadFeedback();
+  showAll();
+</script>
+
+</body>
+</html>
